@@ -43,6 +43,7 @@ public class DataItemAdapter extends RecyclerView.Adapter<DataItemAdapter.ViewHo
                 Log.i("preferences" , "OnSharedPreferenceChangeListener:" + key );
             }
         };
+        setting.registerOnSharedPreferenceChangeListener(preferenceChangeListener);
 
 
 
