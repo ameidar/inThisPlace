@@ -23,6 +23,7 @@ import android.widget.Toast;
 
 import com.ameidar.inthisplace.model.DataItem;
 import com.ameidar.inthisplace.sample.sampleDataProvider;
+import com.ameidar.inthisplace.utils.JSONHelper;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -103,7 +104,17 @@ public class MainActivity extends AppCompatActivity {
             case R.id.action_import:
                 return true ;
             case R.id.action_export:
-//                boolean result = null ;
+
+                boolean result = JSONHelper.exportToJson(this , dataItemList);
+                if (result)
+                {
+                    Toast.makeText(this, "Data exported to file", Toast.LENGTH_SHORT).show();
+                    
+                }
+                else
+                {
+                    Toast.makeText(this, "export failed", Toast.LENGTH_SHORT).show();
+                }
                 return  true;
 
 
