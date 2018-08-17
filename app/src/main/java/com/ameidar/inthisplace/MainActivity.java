@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.nfc.Tag;
 import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
@@ -13,6 +14,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ListView;
@@ -35,6 +37,7 @@ public class MainActivity extends AppCompatActivity {
     public static final int SIGNIN_REQUEST = 1001;
     public static final String MY_GLOBAL_PREFS = "my_global_prefs";
     public static final  int REQUEST_PERMISSION_WRITE = 1002;
+    public static final String TAG = "MainActivity";
     private boolean permissionGranted;
     TextView tvOut;
     List<String> itemNames = new ArrayList<>(  );
@@ -102,6 +105,17 @@ public class MainActivity extends AppCompatActivity {
                 startActivity( settingIntent );
                 return true ;
             case R.id.action_import:
+                //List<DataItem> dataItems = JSONHelper.importFromResource( this );
+                List<DataItem> dataItems = JSONHelper.importFromJson( this );
+                if (dataItems != null)
+                {
+                    for (DataItem dataItem:
+                            dataItems) {
+
+                        Log.i(TAG , "onOptionItemSelected:" + dataItem.getItemName() );
+                    }
+                }
+
                 return true ;
             case R.id.action_export:
 
