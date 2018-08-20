@@ -19,6 +19,23 @@
         android:id="@+id/action_import"
         android:title="@string/action_import"
         app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/onWeb"
+        android:title="@string/on_the_web"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/display_all"
+        android:title="@string/dispaly_all"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/category"
+        android:title="@string/choose_a_category"
+        app:showAsAction="ifRoom" />
+
+
+
+
 
 
 </menu>

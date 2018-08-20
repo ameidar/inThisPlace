@@ -19,6 +19,19 @@
     <string name="pref_display_grid">pref_display_grid</string>
     <string name="action_export">Export</string>
     <string name="action_import">Import</string>
+    <string name="on_the_web">On The Web</string>
+    <string name="dispaly_all">Dispaly All</string>
+    <string name="choose_a_category">Choose a category</string>
+
+    <string-array
+        name="categories">
+        <item>Capernaum</item>
+        <item>Mount of beatitudes</item>
+        <item>Jerusalem</item>
+        <item>Tabgha</item>
+        <item>Holy Land Picture</item>
+        <item>Sea of Galilee</item>
+    </string-array>
 
 
 </resources>

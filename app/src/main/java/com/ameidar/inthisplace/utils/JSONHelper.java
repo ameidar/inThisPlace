@@ -2,6 +2,7 @@ package com.ameidar.inthisplace.utils;
 
 import android.content.Context;
 import android.os.Environment;
+import android.widget.Toast;
 
 import com.ameidar.inthisplace.R;
 import com.ameidar.inthisplace.model.DataItem;
@@ -16,9 +17,13 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.List;
 
+import static android.content.Context.MODE_PRIVATE;
+
 public class JSONHelper {
 
     private static final String FILE_NAME = "Inthisplace.json";
+    private static final String FILE_NAMEIN = "Inthisplace.json";
+
 
     public static boolean exportToJson(Context context, List<DataItem> dataItemList) {
         DataItems menudata = new DataItems();
@@ -28,6 +33,8 @@ public class JSONHelper {
 
         FileOutputStream fileOutputStream = null;
         File file = new File(Environment.getExternalStorageDirectory(), FILE_NAME);
+
+
 
         try {
             fileOutputStream = new FileOutputStream(file);
