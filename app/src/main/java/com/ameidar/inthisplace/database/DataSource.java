@@ -23,12 +23,12 @@ public class DataSource {
     public DataSource(Context mContext) {
         this.mContext = mContext;
         mDbHelper = new DBHelper( mContext );
-        mDatabase = mDbHelper.getReadableDatabase();
+        mDatabase = mDbHelper.getWritableDatabase();
     }
 
     public  void open()
     {
-        mDatabase = mDbHelper.getReadableDatabase();
+        mDatabase = mDbHelper.getWritableDatabase();
     }
 
     public  void close()
@@ -52,17 +52,38 @@ public class DataSource {
 
 
     public void seedDatabase(List<DataItem> dataItemList) {
-        long numItems = getDataItemCount();
-        if (numItems == 0) {
+
+
+        long  i = getDataItemCount();
+        if ( i == 0)
+        {
             for (DataItem item : dataItemList) {
                 try {
-                    createItem( item );
-                } catch (SQLiteException e) {
-                    e.printStackTrace();
+                        createItem( item );
+                    } catch (SQLiteException e) {
+                        e.printStackTrace();
+                    }
                 }
-            }
-
         }
+
+//        try {
+//            mDatabase.beginTransaction();
+//            for (DataItem item : dataItemList) {
+//                try {
+//                    createItem( item );
+//                } catch (SQLiteException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//            mDatabase.setTransactionSuccessful();
+//            mDatabase.endTransaction();
+//        }
+//        catch (Exception e)
+//        {
+//            e.printStackTrace();
+//            mDatabase.endTransaction();
+//
+//        }
     }
 
     public List<DataItem> getAllItems(String category)

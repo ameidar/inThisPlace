@@ -15,6 +15,7 @@ import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -44,7 +45,9 @@ import com.ameidar.inthisplace.utils.JSONHelper;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.net.HttpURLConnection;
 import java.net.URI;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -52,18 +55,22 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
+    private static final int MENU_ITEM_LOGOUT = 1003;
+    private RelativeLayout relativeLayout ;
+
     public static final int SIGNIN_REQUEST = 1001;
     public static final String MY_GLOBAL_PREFS = "my_global_prefs";
-    private static final  String WEB_URL = "https://www.etsy.com/uk/shop/INTHISPLACEphoto?ref=l2-shop-header-avatar&section_id=20719880";
+    private static final String WEB_URL = "https://www.etsy.com/uk/shop/INTHISPLACEphoto?ref=l2-shop-header-avatar&section_id=20719880";
     public static final String email = "info@inthisplace.com";
-    public static final  int REQUEST_PERMISSION_WRITE = 1002;
+    public static final int REQUEST_PERMISSION_WRITE = 1002;
     private static final String TAG = "MainActivity";
     private static final String FILE_NAME = "test.json";
     private boolean permissionGranted;
+    private Menu menu;
     private GestureDetector gestureDetector;
     TextView tvOut;
-    List<String> itemNames = new ArrayList<>(  );
-    List<DataItem> dataItemList = sampleDataProvider.dataItemList ;
+    List<String> itemNames = new ArrayList<>();
+    List<DataItem> dataItemList = sampleDataProvider.dataItemList;
     float dX;
     float dY;
     int lastAction;
@@ -72,9 +79,11 @@ public class MainActivity extends AppCompatActivity {
     String[] mCategories;
 
 
-    List<DataItem>listfromDB;
-    DataSource mDataSource ;
+    List<DataItem> listfromDB;
+    DataSource mDataSource;
     RecyclerView recyclerView;
+    DataItemAdapter mItemAdapter;
+
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
@@ -82,62 +91,41 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate( savedInstanceState );
         setContentView( R.layout.activity_main );
 
-        mDrawerLayout = findViewById( R.id.drawer_layout);
+        relativeLayout = findViewById( R.id.activity_main );
+
+
+        mDrawerLayout = findViewById( R.id.drawer_layout );
         mDrawerList = findViewById( R.id.left_drawer );
         mCategories = getResources().getStringArray( R.array.categories );
 
-        mDrawerList.setAdapter( new ArrayAdapter<>(this,R.layout.drawer_list_item ,mCategories ) );
+        mDrawerList.setAdapter( new ArrayAdapter<>( this, R.layout.drawer_list_item, mCategories ) );
         mDrawerList.setOnItemClickListener( new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 String category = mCategories[position];
-                displayDataItems(category);
+                displayDataItems( category );
             }
         } );
 
         mDataSource = new DataSource( this );
         mDataSource.open();
-        mDataSource.seedDatabase( dataItemList);
+        mDataSource.seedDatabase( dataItemList );
 
-        Toast.makeText( this, "Database acquired!", Toast.LENGTH_SHORT ).show();
-        gestureDetector = new GestureDetector(this, new SingleTapConfirm());
+        gestureDetector = new GestureDetector( this, new SingleTapConfirm() );
         checkPermissions();
 
-//        Collections.sort( dataItemList, new Comparator<DataItem>() {
-//            @Override
-//            public int compare(DataItem o1, DataItem o2) {
-//                return o1.getItemName().compareTo( o2.getItemName() );
-//            }
-//        } );
-
-
-        //listfromDB = mDataSource.getAllItems();
-
-        //ArrayAdapter<String> adapter = new ArrayAdapter<String>(this , android.R.layout.simple_list_item_1 , itemNames  );
-
-        //DataItemAdapter adapter = new DataItemAdapter( this , dataItemList );
-
-        // DataItemAdapter adapter = new DataItemAdapter( this , listfromDB );
 
         SharedPreferences setting = PreferenceManager.getDefaultSharedPreferences( this );
-        boolean grid = setting.getBoolean( getString( R.string.pref_display_grid ) , false);
-
-
-
-        recyclerView = (RecyclerView) findViewById( R.id.rvItems);
-        if (grid)
-        {
-            recyclerView.setLayoutManager( new GridLayoutManager( this , 3 ) );
-
+        boolean grid = setting.getBoolean( getString( R.string.pref_display_grid ), false );
+        recyclerView = (RecyclerView) findViewById( R.id.rvItems );
+        if (grid) {
+            recyclerView.setLayoutManager( new GridLayoutManager( this, 3 ) );
         }
 
-        displayDataItems(null);
+        displayDataItems( null );
 
-
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-
-
-        fab.setOnTouchListener(new View.OnTouchListener() {
+        FloatingActionButton fab = (FloatingActionButton) findViewById( R.id.fab );
+        fab.setOnTouchListener( new View.OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent event) {
                 if (gestureDetector.onTouchEvent( event )) {
@@ -176,131 +164,142 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             }
 
-            });
+        } );
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate( R.menu.main_menu , menu );
-        return super.onCreateOptionsMenu( menu );
+        super.onCreateOptionsMenu(menu);
+        getMenuInflater().inflate( R.menu.main_menu, menu );
+        menu.add( 0,MENU_ITEM_LOGOUT  , 102 , R.string.logout);
+
+        this.menu = menu ;
+        return true ;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId())
-        {
+        switch (item.getItemId()) {
             case R.id.action_signin:
-                Intent intent = new Intent( this , SigninActivity.class );
-                startActivityForResult( intent , SIGNIN_REQUEST );
+                Intent intent = new Intent( this, SigninActivity.class );
+                startActivityForResult( intent, SIGNIN_REQUEST );
                 return true;
             case R.id.action_settings:
-                Intent settingIntent = new Intent( this , PrefsActivity.class );
+                Intent settingIntent = new Intent( this, PrefsActivity.class );
                 startActivity( settingIntent );
-                return true ;
-            case R.id.action_import:
-                //List<DataItem> dataItems = JSONHelper.importFromResource( this );
-                List<DataItem> dataItems = JSONHelper.importFromJson( this );
-                if (dataItems != null)
-                {
-
-                    for (DataItem dataItem:
-                            dataItems) {
-                        Log.i(TAG , "onOptionItemSelected:" + dataItem.getItemName() );
-                    }
-                }
-
-                return true ;
-            case R.id.action_export:
-
-                boolean result = JSONHelper.exportToJson(this , dataItemList);
-                if (result)
-                {
-                    Toast.makeText(this, "Data exported to file", Toast.LENGTH_SHORT).show();
-                    
-                }
-                else
-                {
-                    Toast.makeText(this, "export failed", Toast.LENGTH_SHORT).show();
-                }
-                return  true;
+                return true;
+//            case R.id.action_import:
+//                //List<DataItem> dataItems = JSONHelper.importFromResource( this );
+//                List<DataItem> dataItems = JSONHelper.importFromJson( this );
+//                if (dataItems != null)
+//                {
+//
+//                    for (DataItem dataItem:
+//                            dataItems) {
+//                        Log.i(TAG , "onOptionItemSelected:" + dataItem.getItemName() );
+//                    }
+//                }
+//
+//                return true ;
+//            case R.id.action_export:
+//
+//                boolean result = JSONHelper.exportToJson(this , dataItemList);
+//                if (result)
+//                {
+//                    Toast.makeText(this, "Data exported to file", Toast.LENGTH_SHORT).show();
+//
+//                }
+//                else
+//                {
+//                    Toast.makeText(this, "export failed", Toast.LENGTH_SHORT).show();
+//                }
+//                return  true;
             case R.id.onWeb:
-                Intent webIntent = new Intent(Intent.ACTION_VIEW , Uri.parse(WEB_URL)  );
-                if (webIntent.resolveActivity( getPackageManager() ) != null)
-                {
+                Intent webIntent = new Intent( Intent.ACTION_VIEW, Uri.parse( WEB_URL ) );
+                if (webIntent.resolveActivity( getPackageManager() ) != null) {
                     startActivity( webIntent );
 
                 }
             case R.id.category:
                 //open the drawer
-                mDrawerLayout.openDrawer(mDrawerList);
+                mDrawerLayout.openDrawer( mDrawerList );
 
                 return true;
 
             case R.id.display_all:
-                displayDataItems(null);
+                displayDataItems( null );
                 return true;
 
+            case MENU_ITEM_LOGOUT:
+                Snackbar.make( relativeLayout , "You selected logout" , Snackbar.LENGTH_LONG )
+                        .setAction( "Action" , null ).show();
+                return true;
+
+
+            case R.id.ic_action_bar:
+                //Toast.makeText( this, "You choose shopping cart", Toast.LENGTH_SHORT ).show();
+                Snackbar.make( relativeLayout , "You selected shopping cart" , Snackbar.LENGTH_LONG )
+                        .setAction( "Action" , null ).show();
+                return true;
 
         }
         return super.onOptionsItemSelected( item );
     }
 
-    private void displayDataItems(String category)
-    {
-        mDrawerLayout.closeDrawer(mDrawerList );
-        listfromDB = mDataSource.getAllItems(category);
-        DataItemAdapter mItemAdapter = new DataItemAdapter(this, listfromDB);
-        recyclerView.setAdapter(mItemAdapter);
+    private void displayDataItems(String category) {
+        mDrawerLayout.closeDrawer( mDrawerList );
+        listfromDB = mDataSource.getAllItems( category );
+        mItemAdapter = new DataItemAdapter( this, listfromDB );
+        recyclerView.setAdapter( mItemAdapter );
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult( requestCode, resultCode, data );
-
-        if (resultCode == RESULT_OK && requestCode == SIGNIN_REQUEST)
-        {
+        MenuItem signIn;
+        if (resultCode == RESULT_OK && requestCode == SIGNIN_REQUEST) {
             String email = data.getStringExtra( SigninActivity.EMAIL_KEY );
-            Toast.makeText( this, "You signed in as " +  email , Toast.LENGTH_SHORT ).show();
+            signIn = menu.findItem( R.id.action_signin);
+            signIn.setTitle( "Logout" );
+            Toast.makeText( this, "You signed in as " + email, Toast.LENGTH_SHORT ).show();
             SharedPreferences.Editor editor =
-                    getSharedPreferences(MY_GLOBAL_PREFS, MODE_PRIVATE).edit();
-            editor.putString(SigninActivity.EMAIL_KEY, email);
+                    getSharedPreferences( MY_GLOBAL_PREFS, MODE_PRIVATE ).edit();
+            editor.putString( SigninActivity.EMAIL_KEY, email );
             editor.apply();
 
-        }
-        else
+        } else
             Toast.makeText( this, "request code error", Toast.LENGTH_SHORT ).show();
     }
-
 
 
     /* Checks if external storage is available for read and write */
     public boolean isExternalStorageWritable() {
         String state = Environment.getExternalStorageState();
-        return Environment.MEDIA_MOUNTED.equals(state);
+        return Environment.MEDIA_MOUNTED.equals( state );
     }
 
     /* Checks if external storage is available to at least read */
     public boolean isExternalStorageReadable() {
         String state = Environment.getExternalStorageState();
-        return (Environment.MEDIA_MOUNTED.equals(state) ||
-                Environment.MEDIA_MOUNTED_READ_ONLY.equals(state));
+        return (Environment.MEDIA_MOUNTED.equals( state ) ||
+                Environment.MEDIA_MOUNTED_READ_ONLY.equals( state ));
     }
 
     // Initiate request for permissions.
     private boolean checkPermissions() {
 
         if (!isExternalStorageReadable() || !isExternalStorageWritable()) {
-            Toast.makeText(this, "This app only works on devices with usable external storage",
-                    Toast.LENGTH_SHORT).show();
+            Toast.makeText( this, "This app only works on devices with usable external storage",
+                    Toast.LENGTH_SHORT ).show();
             return false;
         }
 
-        int permissionCheck = ContextCompat.checkSelfPermission(this,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        int permissionCheck = ContextCompat.checkSelfPermission( this,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE );
         if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this,
+            ActivityCompat.requestPermissions( this,
                     new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                    REQUEST_PERMISSION_WRITE);
+                    REQUEST_PERMISSION_WRITE );
             return false;
         } else {
             return true;
@@ -317,10 +316,10 @@ public class MainActivity extends AppCompatActivity {
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     permissionGranted = true;
-                    Toast.makeText(this, "External storage permission granted",
-                            Toast.LENGTH_SHORT).show();
+                    Toast.makeText( this, "External storage permission granted",
+                            Toast.LENGTH_SHORT ).show();
                 } else {
-                    Toast.makeText(this, "You must grant permission!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText( this, "You must grant permission!", Toast.LENGTH_SHORT ).show();
                 }
                 break;
         }

@@ -11,14 +11,7 @@
         android:title="Settings"
         app:showAsAction="ifRoom"/>
 
-    <item
-        android:id="@+id/action_export"
-        android:title="@string/action_export"
-        app:showAsAction="ifRoom" />
-    <item
-        android:id="@+id/action_import"
-        android:title="@string/action_import"
-        app:showAsAction="ifRoom" />
+
     <item
         android:id="@+id/onWeb"
         android:title="@string/on_the_web"
@@ -32,6 +25,14 @@
         android:id="@+id/category"
         android:title="@string/choose_a_category"
         app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/ic_action_bar"
+        android:orderInCategory="0"
+        android:title="@string/shopping_cart"
+        app:showAsAction="always"
+        android:icon="@drawable/ic_action_cart"/>
+
 
 
 

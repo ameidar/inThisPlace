@@ -32,7 +32,8 @@
             android:layout_gravity="bottom|end"
             android:layout_marginBottom="26dp"
             android:layout_marginEnd="27dp"
-            android:src="@android:drawable/ic_dialog_email" />
+            android:src="@android:drawable/ic_dialog_email"
+            app:backgroundTint="?attr/actionModeSplitBackground" />
 
     </RelativeLayout>
 

@@ -22,6 +22,8 @@
     <string name="on_the_web">On The Web</string>
     <string name="dispaly_all">Dispaly All</string>
     <string name="choose_a_category">Choose a category</string>
+    <string name="shopping_cart">Shopping cart</string>
+    <string name="logout">Logout</string>
 
     <string-array
         name="categories">
