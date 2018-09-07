@@ -42,6 +42,10 @@ import com.ameidar.inthisplace.database.DataSource;
 import com.ameidar.inthisplace.model.DataItem;
 import com.ameidar.inthisplace.sample.sampleDataProvider;
 import com.ameidar.inthisplace.utils.JSONHelper;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.iid.InstanceIdResult;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -68,7 +72,6 @@ public class MainActivity extends AppCompatActivity {
     private boolean permissionGranted;
     private Menu menu;
     private GestureDetector gestureDetector;
-    TextView tvOut;
     List<String> itemNames = new ArrayList<>();
     List<DataItem> dataItemList = sampleDataProvider.dataItemList;
     float dX;
@@ -84,12 +87,41 @@ public class MainActivity extends AppCompatActivity {
     RecyclerView recyclerView;
     DataItemAdapter mItemAdapter;
 
+    private  String m_FCMtoken;
+
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate( savedInstanceState );
         setContentView( R.layout.activity_main );
+
+
+
+
+        FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener( new OnSuccessListener<InstanceIdResult>() {
+            @Override
+            public void onSuccess(InstanceIdResult instanceIdResult) {
+                m_FCMtoken= instanceIdResult.getToken();
+                // Do whatever you want with your token now
+                // i.e. store it on SharedPreferences or DB
+                // or directly send it to server
+            }
+        });
+
+       if (getIntent().getExtras() != null)
+        {
+            String lunchMessage = "";
+            for (String key: getIntent().getExtras().keySet()){
+                Object value = getIntent().getExtras().get(key);
+                Log.d( TAG, "key: " + key + "Value:" + value + "\n");
+                lunchMessage+= "key: " + key + "Value:" + value + "\n" ;
+
+            }
+
+
+        }
+
 
         relativeLayout = findViewById( R.id.activity_main );
 
@@ -226,6 +258,11 @@ public class MainActivity extends AppCompatActivity {
 
                 return true;
 
+            case R.id.subscribe:
+                FirebaseMessaging.getInstance().subscribeToTopic( "InThisPlace" );
+
+                return true ;
+
             case R.id.display_all:
                 displayDataItems( null );
                 return true;
@@ -240,6 +277,7 @@ public class MainActivity extends AppCompatActivity {
                 //Toast.makeText( this, "You choose shopping cart", Toast.LENGTH_SHORT ).show();
                 Snackbar.make( relativeLayout , "You selected shopping cart" , Snackbar.LENGTH_LONG )
                         .setAction( "Action" , null ).show();
+                Log.d(TAG , "FCM Token: "+ m_FCMtoken);
                 return true;
 
         }
