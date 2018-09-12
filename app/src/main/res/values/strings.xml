@@ -24,6 +24,8 @@
     <string name="choose_a_category">Choose a category</string>
     <string name="shopping_cart">Shopping cart</string>
     <string name="logout">Logout</string>
+    <string name="subscribe_to_inthisplace">Subscribe to InThisPlace</string>
+    <string name="unsubscribe_in_this_place">UnSubscribe In This Place</string>
 
     <string-array
         name="categories">

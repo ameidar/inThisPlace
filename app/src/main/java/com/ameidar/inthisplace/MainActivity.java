@@ -263,6 +263,11 @@ public class MainActivity extends AppCompatActivity {
 
                 return true ;
 
+            case R.id.UnSubscribe:
+                FirebaseMessaging.getInstance().unsubscribeFromTopic( "InThisPlace" );
+
+                return true ;
+
             case R.id.display_all:
                 displayDataItems( null );
                 return true;
